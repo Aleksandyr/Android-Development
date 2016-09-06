@@ -19,9 +19,11 @@ public class SecondActivity extends Activity {
 
         mTextView = (TextView) findViewById(R.id.second_activity_textView);
         Intent getIntent = getIntent();
-        mTextView.setText(String.valueOf("First text view id: " +
-                getIntent.getIntExtra("firstActivityTextViewId", -1) +
-                ", and content: " +
-                getIntent.getStringExtra("firstActivityTextViewContent")));
+        if(getIntent != null && mTextView != null) {
+			mTextView.setText(String.valueOf("First text view id: " +
+					getIntent.getIntExtra("firstActivityTextViewId", -1) +
+					", and content: " +
+					getIntent.getStringExtra("firstActivityTextViewContent")));
+		}
     }
 }
