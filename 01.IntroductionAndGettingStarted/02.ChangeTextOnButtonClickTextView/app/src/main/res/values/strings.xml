@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">02.ChangeTextOnButtonClickTextView</string>
+    <string name="text_view_text">Hello press any button!</string>
+    <string name="second_text_view_text">Hello!</string>
+    <string name="button1_text">first</string>
+    <string name="button2_text">second</string>
+    <string name="button3_text">third</string>
+    <string name="second_click">Second click!</string>
+</resources>
