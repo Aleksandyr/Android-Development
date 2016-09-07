@@ -5,5 +5,5 @@
     <string name="button1_text">first</string>
     <string name="button2_text">second</string>
     <string name="button3_text">third</string>
-    <string name="second_click">Second click!</string>
+    <string name="twice_click">Twice click!</string>
 </resources>
