@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.mCtx = this;
         this.mDbManager = new DatabaseManager(this.mCtx);
 
-        this.mDbManager.createTable();
+        // this.mDbManager.createTable();
 
         this.mLoadItemsButton = (Button) findViewById(R.id.load_items_button);
         this.mShowItemsButton = (Button) findViewById(R.id.show_items_button);
@@ -50,17 +50,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.mShowItemsButton.setOnClickListener(this);
 
         this.dataVisualisation = new ArrayList<>();
+        this.mRecyclerView = (RecyclerView) findViewById(R.id.recycle_view);
 
-        for (int i = 0; i < 100; i++) {
-            FoodStuff foodStuff = new FoodStuff(i, "food " + i);
-            this.mDbManager.addFood(foodStuff);
-        }
+        this.mLayoutManager = new LinearLayoutManager(this);
+        this.mLayoutManager.canScrollVertically();
+
+        this.mRecyclerView.setLayoutManager(mLayoutManager);
+
+
+
+//        for (int i = 0; i < 100; i++) {
+//            FoodStuff foodStuff = new FoodStuff(i, "food " + i);
+//            this.mDbManager.addFood(foodStuff);
+//        }
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.load_items_button) {
-            itemsFromDb = this.mDbManager.getFoodStuffLimit(30);
+            itemsFromDb = this.mDbManager.getFoodStuffLimit(100);
         }
 
         if (v.getId() == R.id.show_items_button) {
@@ -73,15 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void bindRecycleView(ArrayList<String> dataVisualisation) {
-        this.mRecyclerView = (RecyclerView) findViewById(R.id.recycle_view);
-
-        this.mLayoutManager = new LinearLayoutManager(this);
-        this.mLayoutManager.canScrollVertically();
-
-        this.mRecyclerView.setLayoutManager(mLayoutManager);
-
         this.mAdapter = new RecycleViewAdapter(dataVisualisation);
-
         this.mRecyclerView.setAdapter(mAdapter);
     }
 }
