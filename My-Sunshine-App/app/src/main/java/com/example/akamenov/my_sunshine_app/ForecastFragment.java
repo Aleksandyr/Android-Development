@@ -36,7 +36,8 @@ import java.util.List;
  */
 public class ForecastFragment extends Fragment {
 
-    private static final String POST_CODE = "94043";
+    // Bulgaria post code
+    private static final String POST_CODE = "2700";
 
     private ArrayAdapter<String> mForecastAdapter;
     private ListView mListView;
@@ -309,6 +310,17 @@ public class ForecastFragment extends Fragment {
 
             // This will only happen if there was an error getting or parsing the forecast.
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            if (result != null) {
+                mForecastAdapter.clear();
+                for (String dayForecastStr : result) {
+                    mForecastAdapter.add(dayForecastStr);
+                }
+                // New data is back from the server.
+            }
         }
     }
 }
