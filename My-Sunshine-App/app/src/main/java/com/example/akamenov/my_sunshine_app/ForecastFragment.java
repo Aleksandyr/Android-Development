@@ -1,5 +1,6 @@
 package com.example.akamenov.my_sunshine_app;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -29,6 +30,8 @@ import java.util.List;
  */
 public class ForecastFragment extends Fragment {
 
+    private static final String POST_CODE = "94043";
+
     private ArrayAdapter<String> mForecastAdapter;
     private ListView mListView;
 
@@ -55,6 +58,8 @@ public class ForecastFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
+            FetchWeatherTask weatherTask = new FetchWeatherTask();
+            weatherTask.execute(POST_CODE);
             return true;
         }
 
@@ -76,9 +81,9 @@ public class ForecastFragment extends Fragment {
             "Set - Sunny - 76/68"
         };
 
-        List<String> weekForecast = new ArrayList<String>(Arrays.asList(forecastArray));
+        List<String> weekForecast = new ArrayList<>(Arrays.asList(forecastArray));
 
-        mForecastAdapter = new ArrayAdapter<String>(
+        mForecastAdapter = new ArrayAdapter<>(
                 // The current context (this fragment's parent activity)
                 this.getActivity(),
                 // ID of list item layout
@@ -96,12 +101,18 @@ public class ForecastFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchWeatherTask extends AsyncTask<Void, Void, Void> {
+    public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
+
+            // If there's no zip code, there's nothing to look up. Verify size of params.
+            if (params.length == 0) {
+                return null;
+            }
+
             // These two ned to be decalred outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -109,13 +120,33 @@ public class ForecastFragment extends Fragment {
 
             // Will contain the raw JSON response as a string.
             String forecastJsonStr = null;
+
+            String format = "json";
+            String units = "metric";
+            int numDays = 7;
             try {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are available at OWM's forecast API page, at
                 // http://openweathermap.ord/API#forecast
-                String baseURL = "http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7";
-                String apiKey = "&APPID=" + GlobalConstants.OPEN_WEATHER_MAP_API_KEY;
-                URL url = new URL(baseURL.concat(apiKey));
+                final String FORECAST_BASE_URL =
+                        "http://api.openweathermap.org/data/2.5/forecast/daily?";
+                final String QUERY_PARAM = "q";
+                final String FORMAT_PARAM  = "mode";
+                final String UNITS_PARAM = "units";
+                final String DAYS_PARAM = "cnt";
+                final String APPID_PARAM = "APPID";
+
+                Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
+                        .appendQueryParameter(QUERY_PARAM, params[0])
+                        .appendQueryParameter(FORMAT_PARAM, format)
+                        .appendQueryParameter(UNITS_PARAM, units)
+                        .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                        .appendQueryParameter(APPID_PARAM, BuildConfig.OPEN_WEATHER_MAP_API_KEY)
+                        .build();
+
+                URL url = new URL(builtUri.toString());
+
+                Log.v(LOG_TAG, "Built URI " + builtUri.toString());
 
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -136,7 +167,7 @@ public class ForecastFragment extends Fragment {
                     // Since it's JSON, adding a newLine isn't necessary (it won't affect parsing)
                     // But it does make debugging a *lot* easier if you print out the completed
                     // buffer for debugging.
-                    buffer.append(line + "\n");
+                    buffer.append(line).append("\n");
                 }
 
                 if (buffer.length() == 0) {
@@ -144,6 +175,8 @@ public class ForecastFragment extends Fragment {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
+
+                Log.d(LOG_TAG, "Forecast JSON String: " + forecastJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point int attempting
